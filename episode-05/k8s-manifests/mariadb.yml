@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: mariadb-pvc
-  namespace: drupal
+  namespace: drupal-ns
 spec:
   accessModes:
     - ReadWriteOnce
@@ -16,7 +16,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: mariadb
-  namespace: drupal
+  namespace: drupal-ns
 spec:
   replicas: 1
   selector:
@@ -61,7 +61,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: mariadb
-  namespace: drupal
+  namespace: drupal-ns
 spec:
   ports:
     - port: 3306
