@@ -1,0 +1,55 @@
+# Create a Persistent Disk on GCP
+# gcloud compute disks create --size=10GiB --zone=europe-west1-b drupal-nfs
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-server
+  namespace: drupal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: nfs-server
+  template:
+    metadata:
+      labels:
+        role: nfs-server
+    spec:
+      containers:
+      - name: nfs-server
+        image: gcr.io/google-containers/volume-nfs:latest
+        ports:
+          - name: nfs
+            containerPort: 2049
+          - name: mountd
+            containerPort: 20048
+          - name: rpcbind
+            containerPort: 111
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /exports
+            name: nfs-pvc
+      volumes:
+        - name: nfs-pvc
+          gcePersistentDisk:
+            pdName: drupal-nfs
+            fsType: ext4
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nfs-server
+  namespace: drupal
+spec:
+  ports:
+    - name: nfs
+      port: 2049
+    - name: mountd
+      port: 20048
+    - name: rpcbind
+      port: 111
+  selector:
+    role: nfs-server
